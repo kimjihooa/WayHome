@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
+#include "../InteractionInterface.h"
 #include "WHCharacter.generated.h"
 
 UCLASS()
@@ -47,6 +49,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	float CrouchSpeed;
 
+	//Interaction
+	UPROPERTY(EditAnywhere)
+	USphereComponent* Interaction;
+
 private:
 	//Movements
 	void MoveForward(float NewAxisValue);
@@ -56,4 +62,8 @@ private:
 	void Walk();
 	void Sprint();
 	void Crouch_();
+
+	//Interaction
+	IInteractionInterface* Interface;
+	void Interact();
 };

@@ -50,14 +50,16 @@ AWHCharacter::AWHCharacter()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	//Interaction
-
+	Interaction = CreateDefaultSubobject<USphereComponent>(TEXT("Interaction"));
+	Interaction->SetSphereRadius(150.0f);
+	Interaction->SetupAttachment(RootComponent);
+	Interaction->SetCollisionProfileName(TEXT("Interaction"));
 }
 
 // Called when the game starts or when spawned
 void AWHCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -65,6 +67,36 @@ void AWHCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	TArray<AActor*>OverlappingActors;
+	Interaction->GetOverlappingActors(OverlappingActors);
+
+	if (OverlappingActors.Num() == 0)
+	{
+		if (Interface)
+		{
+			Interface->OutRange();
+			Interface = nullptr;
+		}
+		return;
+	}
+
+	AActor* Closest = OverlappingActors[0];
+	for (auto CurrentActor : OverlappingActors)
+	{
+		if (GetDistanceTo(CurrentActor) < GetDistanceTo(Closest))
+		{
+			Closest = CurrentActor;
+		}
+	}
+	if (Interface)
+	{
+		Interface->OutRange();
+	}
+	Interface = Cast<IInteractionInterface>(Closest);
+	if (Interface)
+	{
+		Interface->InRange();
+	}
 }
 
 // Called to bind functionality to input
@@ -82,6 +114,7 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &AWHCharacter::Crouch_);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
+	PlayerInputComponent->BindAction(TEXT("Interact"), EInputEvent::IE_Pressed, this, &AWHCharacter::Interact);
 }
 
 //Movement
@@ -117,4 +150,13 @@ void AWHCharacter::Crouch_()
 {
 	bIsCrouching = true;
 	Crouch();
+}
+
+//Interaction
+void AWHCharacter::Interact()
+{
+	if (Interface)
+	{
+		Interface->InteractWith();
+	}
 }
