@@ -49,6 +49,8 @@ AWHCharacter::AWHCharacter()
 	GetCharacterMovement()->JumpZVelocity = 700.0f;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
+	//Interaction
+
 }
 
 // Called when the game starts or when spawned
@@ -81,7 +83,6 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &AWHCharacter::Crouch_);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
 }
-
 
 //Movement
 void AWHCharacter::MoveForward(float AxisValue)

@@ -20,6 +20,7 @@ AWHIntro_level::AWHIntro_level()
 	{
 		IntroSound = IntroSoundAsset.Object;
 	}
+	CurrentWidget = nullptr;
 }
 
 void AWHIntro_level::BeginPlay()
