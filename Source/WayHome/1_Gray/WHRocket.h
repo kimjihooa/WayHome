@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "../InteractionInterface.h"
 #include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/PlayerController.h"
 #include "WHRocket.generated.h"
 
 UCLASS()

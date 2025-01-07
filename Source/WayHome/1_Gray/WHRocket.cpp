@@ -37,6 +37,8 @@ AWHRocket::AWHRocket()
 	{
 		WBMapClass = MapBP.Class;
 	}
+	CurrentWidget = nullptr;
+	Controller = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +58,22 @@ void AWHRocket::Tick(float DeltaTime)
 void AWHRocket::InteractWith()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ROcket"));
+	if (WBMapClass)
+	{
+		Controller = GetWorld()->GetFirstPlayerController();
+		CurrentWidget = CreateWidget<UUserWidget>(Controller, WBMapClass);
+		if (CurrentWidget)
+		{
+			CurrentWidget->AddToViewport();
+		}
+
+		//Input Mode To UI only
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(CurrentWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		Controller->SetInputMode(InputMode);
+		Controller->bShowMouseCursor = true;
+	}
 }
 
 void AWHRocket::InRange()
