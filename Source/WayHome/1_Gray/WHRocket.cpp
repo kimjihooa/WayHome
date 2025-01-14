@@ -31,6 +31,7 @@ AWHRocket::AWHRocket()
 	InteractionWidget->SetVisibility(false);
 	InteractionWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 150.0f));
 	InteractionWidget->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+	InteractionWidget->SetCollisionProfileName(TEXT("NoCollision"));
 	
 	static ConstructorHelpers::FClassFinder<UUserWidget> MapBP(TEXT("/Game/UI/StageSelect/Widget_StageSelect.Widget_StageSelect_C"));
 	if (MapBP.Succeeded())
