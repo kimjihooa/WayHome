@@ -49,6 +49,13 @@ AWHCharacter::AWHCharacter()
 	GetCharacterMovement()->JumpZVelocity = 700.0f;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
+	DashChargeStartTime = 0.0f;
+	DashPower = 3000.0f;
+	MaxDashChargeTime = 3.0f;
+	bCanDash = true;
+	DashCooltime = 0.2;
+
+
 	//Interaction
 	Interaction = CreateDefaultSubobject<USphereComponent>(TEXT("Interaction"));
 	Interaction->SetSphereRadius(150.0f);
@@ -108,12 +115,13 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AWHCharacter::MoveRight);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AWHCharacter::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AWHCharacter::LookUp);
-
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AWHCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AWHCharacter::Sprint);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &AWHCharacter::Crouch_);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
+	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AWHCharacter::StartDashCharge);
+	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Released, this, &AWHCharacter::EndDashCharge);
 	PlayerInputComponent->BindAction(TEXT("Interact"), EInputEvent::IE_Pressed, this, &AWHCharacter::Interact);
 }
 
@@ -150,6 +158,33 @@ void AWHCharacter::Crouch_()
 {
 	bIsCrouching = true;
 	Crouch();
+}
+
+void AWHCharacter::Dash(float ChargeTime)
+{
+	if (!bCanDash)
+		return;
+
+	bCanDash = false;
+	ChargeTime = log10(ChargeTime + 1);
+	FVector DashVector = GetActorForwardVector() * ChargeTime * DashPower;
+	LaunchCharacter(DashVector, false, false);
+
+	GetWorld()->GetTimerManager().SetTimer(DashCooltimer, this, &AWHCharacter::ResetDashTimer, DashCooltime, false);
+}
+void AWHCharacter::StartDashCharge()
+{
+	DashChargeStartTime = GetWorld()->GetTimeSeconds();
+}
+void AWHCharacter::EndDashCharge()
+{
+	float ChargeAmount = fmin(float(GetWorld()->GetTimeSeconds() - DashChargeStartTime), MaxDashChargeTime);
+	UE_LOG(LogTemp, Warning, TEXT("Dash Charge Amount: %f"), ChargeAmount);
+	Dash(ChargeAmount);
+}
+void AWHCharacter::ResetDashTimer()
+{
+	bCanDash = true;
 }
 
 //Interaction

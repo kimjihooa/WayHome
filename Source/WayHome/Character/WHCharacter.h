@@ -42,11 +42,22 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool bIsCrouching;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite)
+	float DashPower;
+	UPROPERTY(BlueprintReadWrite)
+	float MaxDashChargeTime;
+	UPROPERTY(BlueprintReadWrite)
+	float DashCooltime;
+	FTimerHandle DashCooltimer;
+	bool bCanDash;
+	UFUNCTION(BlueprintCallable)
+	void ResetDashTimer();
+
+	UPROPERTY(BlueprintReadWrite)
 	float WalkSpeed;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite)
 	float SprintSpeed;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite)
 	float CrouchSpeed;
 
 	//Interaction
@@ -62,6 +73,10 @@ private:
 	void Walk();
 	void Sprint();
 	void Crouch_();
+	void Dash(float ChargeTime);
+	void StartDashCharge();
+	void EndDashCharge();
+	float DashChargeStartTime;
 
 	//Interaction
 	IInteractionInterface* Interface;
