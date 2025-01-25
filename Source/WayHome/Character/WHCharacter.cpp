@@ -166,10 +166,27 @@ void AWHCharacter::Dash(float ChargeTime)
 		return;
 
 	bCanDash = false;
-	ChargeTime = log10(ChargeTime + 1);
-	FVector DashVector = GetActorForwardVector() * ChargeTime * DashPower;
+	ChargeTime = log2(ChargeTime + 1);
+	FVector DashDiraction;
+
+	if (GetCharacterMovement())
+	{
+		if (GetCharacterMovement()->CurrentFloor.IsWalkableFloor())
+		{
+			FVector FloorNormal = GetCharacterMovement()->CurrentFloor.HitResult.ImpactNormal;
+			DashDiraction = FVector::CrossProduct(GetActorRightVector(), FloorNormal);
+		}
+		else
+		{
+			DashDiraction = GetActorForwardVector();
+		}
+	}
+
+	FVector DashVector = DashDiraction * ChargeTime * DashPower;
+	//DashVector.Normalize();
 	LaunchCharacter(DashVector, false, false);
 
+	//Cooltime
 	GetWorld()->GetTimerManager().SetTimer(DashCooltimer, this, &AWHCharacter::ResetDashTimer, DashCooltime, false);
 }
 void AWHCharacter::StartDashCharge()
