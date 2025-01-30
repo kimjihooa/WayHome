@@ -12,7 +12,7 @@ public class WayHome : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-        PublicIncludePaths.AddRange(new string[] {"WayHome/Levels", "WayHome/Character", "WayHome/1_Gray", });
+        PublicIncludePaths.AddRange(new string[] {"WayHome/Levels", "WayHome/Character", "WayHome/1_Gray", "WayHome/2_Yellow", });
 
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
