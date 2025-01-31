@@ -69,26 +69,6 @@ void AWHCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AWHCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-	GetCapsuleComponent()->SetVisibility(true, true);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	GetMesh()->SetVisibility(true, true);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-}
-
-void AWHCharacter::UnPossessed()
-{
-	Super::UnPossessed();
-
-	GetCapsuleComponent()->SetVisibility(false, true);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetVisibility(false, true);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
 // Called every frame
 void AWHCharacter::Tick(float DeltaTime)
 {

@@ -38,6 +38,7 @@ public:
 	USpringArmComponent* SpringArm;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 	UCameraComponent* Camera;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneComponent* Attach;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -51,6 +52,6 @@ private:
 	void Turn(float NewAxisValue);
 	void LookUp(float NewAxisValue);
 
-	APawn* OriginalPawn;
+	ACharacter* OriginalPawn;
 	void GetOff();
 };

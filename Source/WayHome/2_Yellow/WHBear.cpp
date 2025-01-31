@@ -14,7 +14,15 @@ AWHBear::AWHBear()
 	{
 		GetMesh()->SetSkeletalMesh(SK_BEAR.Object);
 	}
+	static ConstructorHelpers::FClassFinder<UAnimInstance> ANIM(TEXT("/Engine/Tutorial/SubEditors/TutorialAssets/Character/TutorialTPP_AnimBlueprint.TutorialTPP_AnimBlueprint_C"));
+	if (ANIM.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(ANIM.Class);
+	}
+
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	GetMesh()->SetCollisionProfileName(TEXT("InteractableBlock"));
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -23,7 +31,7 @@ AWHBear::AWHBear()
 	Camera->SetupAttachment(SpringArm);
 
 	SpringArm->TargetArmLength = 400.0f;
-	SpringArm->SetRelativeRotation(FRotator(-15.0f, 0.0f, 0.0f));
+	SpringArm->SetRelativeRotation(FRotator(-15.0f, 90.0f, 0.0f));
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritYaw = true;
@@ -35,31 +43,9 @@ AWHBear::AWHBear()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 700.0f;
 
-	//Character
-	Attach = CreateDefaultSubobject<USceneComponent>(TEXT("Attach"));
-	Detach = CreateDefaultSubobject<USceneComponent>(TEXT("Detach"));
-	CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Character"));
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CHILD(TEXT("/Game/Assets/Character/Player/CharacterTheBoy.CharacterTheBoy"));
-	if (SK_CHILD.Succeeded())
-	{
-		CharacterMesh->SetSkeletalMesh(SK_CHILD.Object);
-	}
-	static ConstructorHelpers::FClassFinder<UAnimInstance> ANIM(TEXT("/Game/Assets/Character/Player/Animation/AB_TheBoy.AB_TheBoy_C"));
-	if (ANIM.Succeeded())
-	{
-		CharacterMesh->SetAnimInstanceClass(ANIM.Class);
-	}
-
+	Attach = CreateDefaultSubobject<USceneComponent>(TEXT("Ride"));
 	Attach->SetupAttachment(GetCapsuleComponent());
-	Detach->SetupAttachment(GetCapsuleComponent());
-	CharacterMesh->SetupAttachment(Attach);
-
-	Attach->SetRelativeLocation(FVector(0.0f, -40.0f, 0.0f));
-	Detach->SetRelativeLocation(FVector(90.0f, 0.0f, -70.0f));
-
-	CharacterMesh->SetVisibility(false, true);
-	GetMesh()->SetCollisionProfileName(TEXT("InteractableBlock"));
-	GetMesh()->SetGenerateOverlapEvents(true);
+	Attach->SetRelativeLocation(FVector(0.0f, -40.0f, 70.0f));
 }
 
 // Called when the game starts or when spawned
@@ -107,19 +93,20 @@ void AWHBear::LookUp(float AxisValue)
 	AddControllerPitchInput(AxisValue);
 }
 
-void AWHBear::GetOff()
-{
-	FTransform Transform = Detach->GetComponentTransform();
-	OriginalPawn->SetActorTransform(Transform);
-	GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
-}
-
 //Ride
 void AWHBear::InteractWith()
 {
-	OriginalPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-	GetWorld()->GetFirstPlayerController()->Possess(this);
-	CharacterMesh->SetVisibility(true, true);
+	OriginalPawn = GetWorld()->GetFirstPlayerController()->GetCharacter();
+	if (OriginalPawn->IsValidLowLevelFast())
+	{
+		OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		OriginalPawn->AttachToComponent(Attach, FAttachmentTransformRules::KeepWorldTransform);
+		FTransform AttachTransform;
+		OriginalPawn->SetActorTransform(Attach->GetComponentTransform());
+		GetWorld()->GetFirstPlayerController()->Possess(this);
+	}
 }
 void AWHBear::InRange()
 {
@@ -128,4 +115,10 @@ void AWHBear::InRange()
 void AWHBear::OutRange()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Bear out range"));
+}
+void AWHBear::GetOff()
+{
+	FTransform Transform = Detach->GetComponentTransform();
+	OriginalPawn->SetActorTransform(Transform);
+	GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
 }
