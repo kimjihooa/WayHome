@@ -43,17 +43,6 @@ public:
 	bool bIsCrouching;
 
 	UPROPERTY(BlueprintReadWrite)
-	float DashPower;
-	UPROPERTY(BlueprintReadWrite)
-	float MaxDashChargeTime;
-	UPROPERTY(BlueprintReadWrite)
-	float DashCooltime;
-	FTimerHandle DashCooltimer;
-	bool bCanDash;
-	UFUNCTION(BlueprintCallable)
-	void ResetDashTimer();
-
-	UPROPERTY(BlueprintReadWrite)
 	float WalkSpeed;
 	UPROPERTY(BlueprintReadWrite)
 	float SprintSpeed;
@@ -73,10 +62,6 @@ private:
 	void Walk();
 	void Sprint();
 	void Crouch_();
-	void Dash(float ChargeTime);
-	void StartDashCharge();
-	void EndDashCharge();
-	float DashChargeStartTime;
 
 	//Interaction
 	IInteractionInterface* Interface;

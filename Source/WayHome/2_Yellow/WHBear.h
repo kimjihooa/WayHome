@@ -46,6 +46,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* CharacterMesh;
 
+	UPROPERTY(BlueprintReadWrite)
+	float DashPower;
+	UPROPERTY(BlueprintReadWrite)
+	float MaxDashChargeTime;
+	UPROPERTY(BlueprintReadWrite)
+	float DashCooltime;
+	FTimerHandle DashCooltimer;
+	bool bCanDash;
+	UFUNCTION(BlueprintCallable)
+	void ResetDashTimer();
+
 private:
 	void MoveForward(float NewAxisValue);
 	void MoveRight(float NewAxisValue);
@@ -54,4 +65,9 @@ private:
 
 	ACharacter* OriginalPawn;
 	void GetOff();
+
+	void Dash(float ChargeTime);
+	void StartDashCharge();
+	void EndDashCharge();
+	float DashChargeStartTime;
 };

@@ -15,7 +15,6 @@ AWHCharacter::AWHCharacter()
 	SprintSpeed = 1000.0f;
 	CrouchSpeed = 200.0f;
 	
-
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
@@ -49,13 +48,6 @@ AWHCharacter::AWHCharacter()
 	GetCharacterMovement()->JumpZVelocity = 700.0f;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
-	DashChargeStartTime = 0.0f;
-	DashPower = 3000.0f;
-	MaxDashChargeTime = 3.0f;
-	bCanDash = true;
-	DashCooltime = 0.2;
-
-
 	//Interaction
 	Interaction = CreateDefaultSubobject<USphereComponent>(TEXT("Interaction"));
 	Interaction->SetSphereRadius(150.0f);
@@ -74,6 +66,7 @@ void AWHCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//Interaction
 	TArray<AActor*>OverlappingActors;
 	Interaction->GetOverlappingActors(OverlappingActors);
 
@@ -86,7 +79,6 @@ void AWHCharacter::Tick(float DeltaTime)
 		}
 		return;
 	}
-
 	AActor* Closest = OverlappingActors[0];
 	for (auto CurrentActor : OverlappingActors)
 	{
@@ -120,8 +112,6 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &AWHCharacter::Crouch_);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
-	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AWHCharacter::StartDashCharge);
-	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Released, this, &AWHCharacter::EndDashCharge);
 	PlayerInputComponent->BindAction(TEXT("Interact"), EInputEvent::IE_Pressed, this, &AWHCharacter::Interact);
 }
 
@@ -158,50 +148,6 @@ void AWHCharacter::Crouch_()
 {
 	bIsCrouching = true;
 	Crouch();
-}
-
-void AWHCharacter::Dash(float ChargeTime)
-{
-	if (!bCanDash)
-		return;
-
-	bCanDash = false;
-	ChargeTime = log2(ChargeTime + 1);
-	FVector DashDiraction;
-
-	if (GetCharacterMovement())
-	{
-		if (GetCharacterMovement()->CurrentFloor.IsWalkableFloor())
-		{
-			FVector FloorNormal = GetCharacterMovement()->CurrentFloor.HitResult.ImpactNormal;
-			DashDiraction = FVector::CrossProduct(GetActorRightVector(), FloorNormal);
-		}
-		else
-		{
-			DashDiraction = GetActorForwardVector();
-		}
-	}
-
-	FVector DashVector = DashDiraction * ChargeTime * DashPower;
-	//DashVector.Normalize();
-	LaunchCharacter(DashVector, false, false);
-
-	//Cooltime
-	GetWorld()->GetTimerManager().SetTimer(DashCooltimer, this, &AWHCharacter::ResetDashTimer, DashCooltime, false);
-}
-void AWHCharacter::StartDashCharge()
-{
-	DashChargeStartTime = GetWorld()->GetTimeSeconds();
-}
-void AWHCharacter::EndDashCharge()
-{
-	float ChargeAmount = fmin(float(GetWorld()->GetTimeSeconds() - DashChargeStartTime), MaxDashChargeTime);
-	UE_LOG(LogTemp, Warning, TEXT("Dash Charge Amount: %f"), ChargeAmount);
-	Dash(ChargeAmount);
-}
-void AWHCharacter::ResetDashTimer()
-{
-	bCanDash = true;
 }
 
 //Interaction

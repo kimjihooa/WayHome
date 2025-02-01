@@ -46,6 +46,16 @@ AWHBear::AWHBear()
 	Attach = CreateDefaultSubobject<USceneComponent>(TEXT("Ride"));
 	Attach->SetupAttachment(GetCapsuleComponent());
 	Attach->SetRelativeLocation(FVector(0.0f, -40.0f, 70.0f));
+	Detach = CreateDefaultSubobject<USceneComponent>(TEXT("GetOff"));
+	Detach->SetupAttachment(GetCapsuleComponent());
+	Detach->SetRelativeLocation(FVector(80.0f, 0.0f, -70.0f));
+	
+	//Dash
+	DashChargeStartTime = 0.0f;
+	DashPower = 3000.0f;
+	MaxDashChargeTime = 3.0f;
+	bCanDash = true;
+	DashCooltime = 0.2;
 }
 
 // Called when the game starts or when spawned
@@ -73,6 +83,8 @@ void AWHBear::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AWHBear::LookUp);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AWHBear::Jump);
 	PlayerInputComponent->BindAction(TEXT("Interact"), EInputEvent::IE_Pressed, this, &AWHBear::GetOff);
+	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AWHBear::StartDashCharge);
+	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Released, this, &AWHBear::EndDashCharge);
 }
 
 //Movement
@@ -92,6 +104,50 @@ void AWHBear::LookUp(float AxisValue)
 {
 	AddControllerPitchInput(AxisValue);
 }
+//Dash
+void AWHBear::Dash(float ChargeTime)
+{
+	if (!bCanDash)
+		return;
+
+	bCanDash = false;
+	ChargeTime = log2(ChargeTime + 1);
+	FVector DashDiraction;
+
+	if (GetCharacterMovement())
+	{
+		if (GetCharacterMovement()->CurrentFloor.IsWalkableFloor())
+		{
+			FVector FloorNormal = GetCharacterMovement()->CurrentFloor.HitResult.ImpactNormal;
+			DashDiraction = FVector::CrossProduct(GetActorRightVector(), FloorNormal);
+		}
+		else
+		{
+			DashDiraction = GetActorForwardVector();
+		}
+	}
+
+	FVector DashVector = DashDiraction * ChargeTime * DashPower;
+	//DashVector.Normalize();
+	LaunchCharacter(DashVector, false, false);
+
+	//Cooltime
+	GetWorld()->GetTimerManager().SetTimer(DashCooltimer, this, &AWHBear::ResetDashTimer, DashCooltime, false);
+}
+void AWHBear::StartDashCharge()
+{
+	DashChargeStartTime = GetWorld()->GetTimeSeconds();
+}
+void AWHBear::EndDashCharge()
+{
+	float ChargeAmount = fmin(float(GetWorld()->GetTimeSeconds() - DashChargeStartTime), MaxDashChargeTime);
+	UE_LOG(LogTemp, Warning, TEXT("Dash Charge Amount: %f"), ChargeAmount);
+	Dash(ChargeAmount);
+}
+void AWHBear::ResetDashTimer()
+{
+	bCanDash = true;
+}
 
 //Ride
 void AWHBear::InteractWith()
@@ -101,24 +157,30 @@ void AWHBear::InteractWith()
 	{
 		OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+		OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
 		OriginalPawn->AttachToComponent(Attach, FAttachmentTransformRules::KeepWorldTransform);
-		FTransform AttachTransform;
 		OriginalPawn->SetActorTransform(Attach->GetComponentTransform());
 		GetWorld()->GetFirstPlayerController()->Possess(this);
 	}
 }
 void AWHBear::InRange()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Bear in range"));
+	//UE_LOG(LogTemp, Warning, TEXT("Bear in range"));
 }
 void AWHBear::OutRange()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Bear out range"));
+	//UE_LOG(LogTemp, Warning, TEXT("Bear out range"));
 }
 void AWHBear::GetOff()
 {
-	FTransform Transform = Detach->GetComponentTransform();
-	OriginalPawn->SetActorTransform(Transform);
-	GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
+	if(OriginalPawn->IsValidLowLevel() && GetCharacterMovement()->IsMovingOnGround())
+	{
+		OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->StopMovementImmediately();
+		OriginalPawn->SetActorTransform(Detach->GetComponentTransform());
+		OriginalPawn->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
+	}
 }
