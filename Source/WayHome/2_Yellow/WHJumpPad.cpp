@@ -15,6 +15,11 @@ AWHJumpPad::AWHJumpPad()
 	Box->OnComponentBeginOverlap.AddDynamic(this, &AWHJumpPad::OnBoxBeginOverlap);
 	Box->SetBoxExtent(FVector(32.0f, 32.0f, 5.0f));
 
+	Direction = CreateDefaultSubobject<UArrowComponent>(TEXT("Dir"));
+	Direction->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+	Direction->SetupAttachment(Box);
+	Direction->SetArrowLength(40.0f);
+
 	LunchFactor = 1.0f;
 }
 
@@ -35,8 +40,11 @@ void AWHJumpPad::Tick(float DeltaTime)
 void AWHJumpPad::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacter* OtherCharacter = Cast<ACharacter>(OtherActor);
-	float Z = (OtherActor->GetVelocity().Z) * ((LunchFactor + 1.0f) * -1.0f);
-	OtherCharacter->LaunchCharacter(FVector(0.0f, 0.0f, Z), false, false);
+	FVector Incoming = OtherCharacter->GetVelocity();
+	FVector Normal = Direction->GetForwardVector();
+	FVector Reflected = Incoming - 2 * FVector::DotProduct(Incoming, Normal) * Normal;
+
+	OtherCharacter->LaunchCharacter(Reflected * LunchFactor, true, true);
 }
 
 

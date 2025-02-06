@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "Components/ArrowComponent.h"
 #include "GameFramework/Character.h"
 #include "WHJumpPad.generated.h"
 
@@ -29,7 +30,10 @@ public:
 	float LunchFactor;
 
 private:
+	UPROPERTY(EditAnywhere)
 	UBoxComponent* Box;
+	UPROPERTY(EditAnywhere)
+	UArrowComponent* Direction;
 
 	UFUNCTION()
 	void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
