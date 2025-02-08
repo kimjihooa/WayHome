@@ -7,7 +7,9 @@
 #include "../InteractionInterface.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "WHRocket.generated.h"
 
 UCLASS()

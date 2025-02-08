@@ -24,7 +24,7 @@ void AWHPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction(TEXT("Tab"), EInputEvent::IE_Pressed, this, &AWHPlayerController::ShowGamePlayWidget);
 	InputComponent->BindAction(TEXT("Tab"), EInputEvent::IE_Released, this, &AWHPlayerController::RemoveGamePlayWidget);
-	InputComponent->BindAction(TEXT("Esc"), EInputEvent::IE_Pressed, this, &AWHPlayerController::TogglePauseWidget);
+	//InputComponent->BindAction(TEXT("Esc"), EInputEvent::IE_Pressed, this, &AWHPlayerController::_Pause);
 }
 
 void AWHPlayerController::ShowGamePlayWidget()
@@ -60,40 +60,21 @@ void AWHPlayerController::RemoveGamePlayWidget()
 	SetInputMode(InputMode);
 }
 
-void AWHPlayerController::TogglePauseWidget()
+void AWHPlayerController::_Pause()
 {
-	if (IsPaused()) //ÀÌ°Å ¿Ö ¾ÈµÇ¤Ó¸Û¤±¤¤¾Ö¹Î¾Ö¤¿¤±¤¤ÀÌ
+	if (WBPauseClass)
 	{
-		if (CurrentWidget && CurrentWidget->IsA(WBPauseClass))
+		CurrentWidget = CreateWidget<UUserWidget>(this, WBPauseClass);
+		if (CurrentWidget)
 		{
-			CurrentWidget->RemoveFromParent();
-			CurrentWidget = nullptr;
+			CurrentWidget->AddToViewport();
+			//CurrentWidget->SetKeyboardFocus();
 		}
 
-		SetPause(false);
-
-		//Input Mode to Game only
-		bShowMouseCursor = false;
-		FInputModeGameOnly InputMode;
-		SetInputMode(InputMode);
-	}
-	else
-	{
-		RemoveGamePlayWidget();
-
-		if (WBPauseClass)
-		{
-			CurrentWidget = CreateWidget<UUserWidget>(this, WBPauseClass);
-			if (CurrentWidget)
-			{
-				CurrentWidget->AddToViewport();
-			}
-		}
-
-		SetPause(true);
-
-		//Input Mode To UI only
-		bShowMouseCursor = true;
-		SetInputMode(FInputModeUIOnly());
+		//FInputModeGameAndUI InputMode;
+		//InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		//SetInputMode(InputMode);
+		//bShowMouseCursor = true;
+		//SetPause(true);
 	}
 }

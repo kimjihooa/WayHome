@@ -32,7 +32,7 @@ private:
 	void RemoveGamePlayWidget();
 
 	UFUNCTION()
-	void TogglePauseWidget();
+	void _Pause();
 
 	UUserWidget* CurrentWidget;
 		

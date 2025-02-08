@@ -58,22 +58,23 @@ void AWHRocket::Tick(float DeltaTime)
 
 void AWHRocket::InteractWith()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ROcket"));
 	if (WBMapClass)
 	{
 		Controller = GetWorld()->GetFirstPlayerController();
+		Controller->GetCharacter()->GetCharacterMovement()->StopMovementImmediately();
+
 		CurrentWidget = CreateWidget<UUserWidget>(Controller, WBMapClass);
 		if (CurrentWidget)
 		{
 			CurrentWidget->AddToViewport();
+			//CurrentWidget->SetKeyboardFocus();
 		}
 
-		//Input Mode To UI only
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(CurrentWidget->TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		Controller->SetInputMode(InputMode);
-		Controller->bShowMouseCursor = true;
+		//FInputModeGameAndUI InputMode;
+		//InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		//Controller->SetInputMode(InputMode);
+		//Controller->bShowMouseCursor = true;
+		//Controller->SetPause(true);
 	}
 }
 
