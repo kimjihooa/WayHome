@@ -5,14 +5,12 @@
 
 // Add default functionality here for any IInteractionInterface functions that are not pure virtual.
 
-void IInteractionInterface::InteractWith()
+void IInteractionInterface::InteractWith_Implementation()
 {
 }
-
-void IInteractionInterface::InRange()
+void IInteractionInterface::InRange_Implementation()
 {
 }
-
-void IInteractionInterface::OutRange()
+void IInteractionInterface::OutRange_Implementation()
 {
 }

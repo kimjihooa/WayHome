@@ -70,15 +70,21 @@ void AWHCharacter::Tick(float DeltaTime)
 	TArray<AActor*>OverlappingActors;
 	Interaction->GetOverlappingActors(OverlappingActors);
 
+	//If Nothing is in range
 	if (OverlappingActors.Num() == 0)
 	{
-		if (Interface)
+		if (InteractableActor)
 		{
-			Interface->OutRange();
-			Interface = nullptr;
+			if (InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+			{
+				IInteractionInterface::Execute_OutRange(InteractableActor);
+			}
+			InteractableActor = nullptr;
 		}
 		return;
 	}
+
+	//Get closest actor
 	AActor* Closest = OverlappingActors[0];
 	for (auto CurrentActor : OverlappingActors)
 	{
@@ -87,14 +93,18 @@ void AWHCharacter::Tick(float DeltaTime)
 			Closest = CurrentActor;
 		}
 	}
-	if (Interface)
+	
+	if (InteractableActor && InteractableActor != Closest)
 	{
-		Interface->OutRange();
+		if (InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		{
+			IInteractionInterface::Execute_OutRange(InteractableActor);
+		}
 	}
-	Interface = Cast<IInteractionInterface>(Closest);
-	if (Interface)
+	InteractableActor = Closest;
+	if (InteractableActor && InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
-		Interface->InRange();
+		IInteractionInterface::Execute_InRange(InteractableActor);
 	}
 }
 
@@ -153,8 +163,8 @@ void AWHCharacter::Crouch_()
 //Interaction
 void AWHCharacter::Interact()
 {
-	if (Interface)
+	if (InteractableActor && InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
-		Interface->InteractWith();
+		IInteractionInterface::Execute_InteractWith(InteractableActor);
 	}
 }

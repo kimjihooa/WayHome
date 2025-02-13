@@ -28,9 +28,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void InteractWith() override;
-	virtual void InRange() override;
-	virtual void OutRange() override;
+	virtual void InteractWith_Implementation() override;
+	virtual void InRange_Implementation() override;
+	virtual void OutRange_Implementation() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> WBMapClass;

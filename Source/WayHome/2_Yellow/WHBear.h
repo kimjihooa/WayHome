@@ -23,9 +23,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	virtual void InteractWith() override;
-	virtual void InRange() override;
-	virtual void OutRange() override;
+	virtual void InteractWith_Implementation() override;
+	virtual void InRange_Implementation() override;
+	virtual void OutRange_Implementation() override;
 
 public:	
 	// Called every frame

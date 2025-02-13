@@ -150,7 +150,7 @@ void AWHBear::ResetDashTimer()
 }
 
 //Ride
-void AWHBear::InteractWith()
+void AWHBear::InteractWith_Implementation()
 {
 	OriginalPawn = GetWorld()->GetFirstPlayerController()->GetCharacter();
 	if (OriginalPawn->IsValidLowLevelFast())
@@ -163,11 +163,11 @@ void AWHBear::InteractWith()
 		GetWorld()->GetFirstPlayerController()->Possess(this);
 	}
 }
-void AWHBear::InRange()
+void AWHBear::InRange_Implementation()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Bear in range"));
 }
-void AWHBear::OutRange()
+void AWHBear::OutRange_Implementation()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Bear out range"));
 }

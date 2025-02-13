@@ -50,7 +50,7 @@ public:
 	float CrouchSpeed;
 
 	//Interaction
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USphereComponent* Interaction;
 
 private:
@@ -66,4 +66,5 @@ private:
 	//Interaction
 	IInteractionInterface* Interface;
 	void Interact();
+	AActor* InteractableActor;
 };

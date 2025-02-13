@@ -32,6 +32,7 @@ AWHRocket::AWHRocket()
 	InteractionWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 150.0f));
 	InteractionWidget->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 	InteractionWidget->SetCollisionProfileName(TEXT("NoCollision"));
+	InteractionWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	
 	static ConstructorHelpers::FClassFinder<UUserWidget> MapBP(TEXT("/Game/UI/StageSelect/Widget_StageSelect.Widget_StageSelect_C"));
 	if (MapBP.Succeeded())
@@ -56,7 +57,7 @@ void AWHRocket::Tick(float DeltaTime)
 
 }
 
-void AWHRocket::InteractWith()
+void AWHRocket::InteractWith_Implementation()
 {
 	if (WBMapClass)
 	{
@@ -78,12 +79,12 @@ void AWHRocket::InteractWith()
 	}
 }
 
-void AWHRocket::InRange()
+void AWHRocket::InRange_Implementation()
 {
 	InteractionWidget->SetVisibility(true);
 }
 
-void AWHRocket::OutRange()
+void AWHRocket::OutRange_Implementation()
 {
 	InteractionWidget->SetVisibility(false);
 }

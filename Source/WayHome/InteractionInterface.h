@@ -22,7 +22,14 @@ class WAYHOME_API IInteractionInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void InteractWith();
-	virtual void InRange();
-	virtual void OutRange();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void InteractWith();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void InRange();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OutRange();
+
+	virtual void InteractWith_Implementation();
+	virtual void InRange_Implementation();
+	virtual void OutRange_Implementation();
 };
