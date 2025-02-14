@@ -10,6 +10,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "../InteractionInterface.h"
+#include "../DialogueComponent.h"
 #include "WHCharacter.generated.h"
 
 UCLASS()
