@@ -9,7 +9,7 @@ AWHBear::AWHBear()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Engine/Tutorial/SubEditors/TutorialAssets/Character/TutorialTPP.TutorialTPP"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Game/Assets/Character/TeddyBear/TeddyBear_Final.TeddyBear_Final"));
 	if (SK_BEAR.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(SK_BEAR.Object);
@@ -21,6 +21,7 @@ AWHBear::AWHBear()
 	}
 
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetCollisionProfileName(TEXT("InteractableBlock"));
 	GetMesh()->SetGenerateOverlapEvents(true);
 
