@@ -11,6 +11,12 @@
 #include "Components/SphereComponent.h"
 #include "../InteractionInterface.h"
 #include "../DialogueComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "Components/InputComponent.h"
+#include "InputMappingContext.h"
 #include "WHCharacter.generated.h"
 
 UCLASS()
@@ -38,6 +44,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Camera)
 	UCameraComponent* Camera;
 
+	//Movements
 	UPROPERTY(VisibleAnywhere)
 	bool bIsSprinting;
 	UPROPERTY(VisibleAnywhere)
@@ -54,15 +61,28 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USphereComponent* Interaction;
 
+	//Input System
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputMappingContext* CharacterMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* MoveInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* LookInputAction;
+
 private:
 	//Movements
-	void MoveForward(float NewAxisValue);
-	void MoveRight(float NewAxisValue);
-	void Turn(float NewAxisValue);
-	void LookUp(float NewAxisValue);
+	//void MoveForward(float AxisValue);
+	//void MoveRight(float NewAxisValue);
+	//void Turn(float NewAxisValue);
+	//void LookUp(float NewAxisValue);
 	void Walk();
 	void Sprint();
 	void Crouch_();
+
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
+	UFUNCTION()
+	void Look(const FInputActionValue& Value);
 
 	//Interaction
 	IInteractionInterface* Interface;

@@ -53,12 +53,37 @@ AWHCharacter::AWHCharacter()
 	Interaction->SetSphereRadius(150.0f);
 	Interaction->SetupAttachment(RootComponent);
 	Interaction->SetCollisionProfileName(TEXT("Interaction"));
+
+	//Input
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext>CONTEXT(TEXT("/Game/Blueprints/Character/Input/IMC_Character.IMC_Character"));
+	if (CONTEXT.Succeeded())
+	{
+		CharacterMappingContext = CONTEXT.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_MOVE(TEXT("/Game/Blueprints/Character/Input/IA_Move.IA_Move"));
+	if (IA_MOVE.Succeeded())
+	{
+		MoveInputAction = IA_MOVE.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_LOOK(TEXT("/Game/Blueprints/Character/Input/IA_Look.IA_Look"));
+	if (IA_LOOK.Succeeded())
+	{
+		LookInputAction = IA_LOOK.Object;
+	}
 }
 
 // Called when the game starts or when spawned
 void AWHCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(CharacterMappingContext, 0);
+		}
+	}
 }
 
 // Called every frame
@@ -113,10 +138,16 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
-	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AWHCharacter::MoveRight);
-	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AWHCharacter::Turn);
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AWHCharacter::LookUp);
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Move);
+		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Look);
+	}
+
+	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
+	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AWHCharacter::MoveRight);
+	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AWHCharacter::Turn);
+	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AWHCharacter::LookUp);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AWHCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AWHCharacter::Sprint);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AWHCharacter::Walk);
@@ -126,22 +157,22 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 //Movement
-void AWHCharacter::MoveForward(float AxisValue)
-{
-	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue);
-}
-void AWHCharacter::MoveRight(float AxisValue)
-{
-	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue);
-}
-void AWHCharacter::Turn(float AxisValue)
-{
-	AddControllerYawInput(AxisValue);
-}
-void AWHCharacter::LookUp(float AxisValue)
-{
-	AddControllerPitchInput(AxisValue);
-}
+//void AWHCharacter::MoveForward(float AxisValue)
+//{
+//	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue);
+//}
+//void AWHCharacter::MoveRight(float AxisValue)
+//{
+//	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue);
+//}
+//void AWHCharacter::Turn(float AxisValue)
+//{
+//	AddControllerYawInput(AxisValue);
+//}
+//void AWHCharacter::LookUp(float AxisValue)
+//{
+//	AddControllerPitchInput(AxisValue);
+//}
 void AWHCharacter::Walk()
 {
 	bIsSprinting = false;
@@ -158,6 +189,25 @@ void AWHCharacter::Crouch_()
 {
 	bIsCrouching = true;
 	Crouch();
+}
+
+void AWHCharacter::Move(const FInputActionValue& Value)
+{
+	FVector2D AxisValue = Value.Get<FVector2D>();
+	if(GetController())
+	{
+		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue.Y);
+		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue.X);
+	}
+}
+void AWHCharacter::Look(const FInputActionValue& Value)
+{
+	const FVector2D AxisValue = Value.Get<FVector2D>();
+	if (GetController())
+	{
+		AddControllerYawInput(AxisValue.X);
+		AddControllerPitchInput(AxisValue.Y * -1.0f);
+	}
 }
 
 //Interaction
