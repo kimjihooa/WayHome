@@ -31,6 +31,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
 
 public:	
 	// Called every frame
@@ -68,6 +69,14 @@ public:
 	UInputAction* MoveInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* LookInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* JumpInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* SpriInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* CrouInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* InteInputAction;
 
 private:
 	//Movements
@@ -78,10 +87,8 @@ private:
 	void Walk();
 	void Sprint();
 	void Crouch_();
-
-	UFUNCTION()
+	//New Input System
 	void Move(const FInputActionValue& Value);
-	UFUNCTION()
 	void Look(const FInputActionValue& Value);
 
 	//Interaction

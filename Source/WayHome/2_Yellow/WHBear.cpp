@@ -49,14 +49,34 @@ AWHBear::AWHBear()
 	Attach->SetRelativeLocation(FVector(0.0f, -40.0f, 70.0f));
 	Detach = CreateDefaultSubobject<USceneComponent>(TEXT("GetOff"));
 	Detach->SetupAttachment(GetCapsuleComponent());
-	Detach->SetRelativeLocation(FVector(80.0f, 0.0f, -70.0f));
+	Detach->SetRelativeLocation(FVector(0.0f, -160.0f, -70.0f));
 	
 	//Dash
-	DashChargeStartTime = 0.0f;
+	//DashChargeStartTime = 0.0f;
 	DashPower = 3000.0f;
 	MaxDashChargeTime = 3.0f;
 	bCanDash = true;
 	DashCooltime = 0.2;
+
+	//Input
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext>CONTEXT(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IMC_Bear.IMC_Bear"));
+	if (CONTEXT.Succeeded())
+		InputMappingContext = CONTEXT.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_MOVE(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IA_BearMove.IA_BearMove"));
+	if (IA_MOVE.Succeeded())
+		MoveInputAction = IA_MOVE.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_LOOK(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IA_BearLook.IA_BearLook"));
+	if (IA_LOOK.Succeeded())
+		LookInputAction = IA_LOOK.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_JUMP(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IA_BearJump.IA_BearJump"));
+	if (IA_JUMP.Succeeded())
+		JumpInputAction = IA_JUMP.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_INTE(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IA_BearInteract.IA_BearInteract"));
+	if (IA_INTE.Succeeded())
+		InteInputAction = IA_INTE.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_DASH(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IA_BearDash.IA_BearDash"));
+	if (IA_DASH.Succeeded())
+		DashInputAction = IA_DASH.Object;
 }
 
 // Called when the game starts or when spawned
@@ -64,6 +84,19 @@ void AWHBear::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+void AWHBear::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
 }
 
 // Called every frame
@@ -78,39 +111,70 @@ void AWHBear::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHBear::MoveForward);
-	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AWHBear::MoveRight);
-	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AWHBear::Turn);
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AWHBear::LookUp);
-	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AWHBear::Jump);
-	PlayerInputComponent->BindAction(TEXT("Interact"), EInputEvent::IE_Pressed, this, &AWHBear::GetOff);
-	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AWHBear::StartDashCharge);
-	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Released, this, &AWHBear::EndDashCharge);
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AWHBear::Move);
+		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AWHBear::Look);
+		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &AWHBear::Jump);
+		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Triggered, this, &AWHBear::GetOff);
+		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHBear::Dash);
+	}
+
+	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHBear::MoveForward);
+	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AWHBear::MoveRight);
+	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AWHBear::Turn);
+	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AWHBear::LookUp);
+	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AWHBear::Jump);
+	//PlayerInputComponent->BindAction(TEXT("Interact"), EInputEvent::IE_Pressed, this, &AWHBear::GetOff);
+	//PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AWHBear::StartDashCharge);
+	//PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Released, this, &AWHBear::EndDashCharge);
 }
 
 //Movement
-void AWHBear::MoveForward(float AxisValue)
+//void AWHBear::MoveForward(float AxisValue)
+//{
+//	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue);
+//}
+//void AWHBear::MoveRight(float AxisValue)
+//{
+//	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue);
+//}
+//void AWHBear::Turn(float AxisValue)
+//{
+//	AddControllerYawInput(AxisValue);
+//}
+//void AWHBear::LookUp(float AxisValue)
+//{
+//	AddControllerPitchInput(AxisValue);
+//}
+void AWHBear::Move(const FInputActionValue& Value)
 {
-	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue);
+	FVector2D AxisValue = Value.Get<FVector2D>();
+	if (GetController())
+	{
+		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue.Y);
+		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue.X);
+	}
 }
-void AWHBear::MoveRight(float AxisValue)
+void AWHBear::Look(const FInputActionValue& Value)
 {
-	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue);
+	const FVector2D AxisValue = Value.Get<FVector2D>();
+	if (GetController())
+	{
+		AddControllerYawInput(AxisValue.X);
+		AddControllerPitchInput(AxisValue.Y * -1.0f);
+	}
 }
-void AWHBear::Turn(float AxisValue)
-{
-	AddControllerYawInput(AxisValue);
-}
-void AWHBear::LookUp(float AxisValue)
-{
-	AddControllerPitchInput(AxisValue);
-}
+
 //Dash
-void AWHBear::Dash(float ChargeTime)
+void AWHBear::Dash(const FInputActionInstance& Value)
 {
 	if (!bCanDash)
 		return;
 
+	float ChargeTime = Value.GetElapsedTime();
+	ChargeTime = ChargeTime < MaxDashChargeTime ? ChargeTime : MaxDashChargeTime;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), ChargeTime);
 	bCanDash = false;
 	ChargeTime = log2(ChargeTime + 1);
 	FVector DashDiraction;
@@ -135,20 +199,20 @@ void AWHBear::Dash(float ChargeTime)
 	//Cooltime
 	GetWorld()->GetTimerManager().SetTimer(DashCooltimer, this, &AWHBear::ResetDashTimer, DashCooltime, false);
 }
-void AWHBear::StartDashCharge()
-{
-	DashChargeStartTime = GetWorld()->GetTimeSeconds();
-}
-void AWHBear::EndDashCharge()
-{
-	float ChargeAmount = fmin(float(GetWorld()->GetTimeSeconds() - DashChargeStartTime), MaxDashChargeTime);
-	UE_LOG(LogTemp, Warning, TEXT("Dash Charge Amount: %f"), ChargeAmount);
-	Dash(ChargeAmount);
-}
 void AWHBear::ResetDashTimer()
 {
 	bCanDash = true;
 }
+//void AWHBear::StartDashCharge()
+//{
+//	DashChargeStartTime = GetWorld()->GetTimeSeconds();
+//}
+//void AWHBear::EndDashCharge()
+//{
+//	float ChargeAmount = fmin(float(GetWorld()->GetTimeSeconds() - DashChargeStartTime), MaxDashChargeTime);
+//	UE_LOG(LogTemp, Warning, TEXT("Dash Charge Amount: %f"), ChargeAmount);
+//	Dash(ChargeAmount);
+//}
 
 //Ride
 void AWHBear::InteractWith_Implementation()

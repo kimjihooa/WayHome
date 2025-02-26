@@ -9,6 +9,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "Components/InputComponent.h"
+#include "InputMappingContext.h"
 #include "WHBear.generated.h"
 
 UCLASS()
@@ -23,6 +29,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
 	virtual void InteractWith_Implementation() override;
 	virtual void InRange_Implementation() override;
 	virtual void OutRange_Implementation() override;
@@ -57,17 +64,34 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetDashTimer();
 
+	//Input
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputMappingContext* InputMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* MoveInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* LookInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* JumpInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* InteInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* DashInputAction;
+
 private:
-	void MoveForward(float NewAxisValue);
-	void MoveRight(float NewAxisValue);
-	void Turn(float NewAxisValue);
-	void LookUp(float NewAxisValue);
+	//void MoveForward(float NewAxisValue);
+	//void MoveRight(float NewAxisValue);
+	//void Turn(float NewAxisValue);
+	//void LookUp(float NewAxisValue);
+	//New Input System
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
 
 	ACharacter* OriginalPawn;
 	void GetOff();
 
-	void Dash(float ChargeTime);
-	void StartDashCharge();
-	void EndDashCharge();
-	float DashChargeStartTime;
+	void Dash(const FInputActionInstance& Value);
+	//void StartDashCharge();
+	//void EndDashCharge();
+	//float DashChargeStartTime;
 };
