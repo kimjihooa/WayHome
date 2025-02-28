@@ -22,17 +22,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> WBGamePlayClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> WBPauseClass;
+
 
 private:
 	UFUNCTION()
 	void ShowGamePlayWidget();
 	UFUNCTION()
 	void RemoveGamePlayWidget();
-
-	UFUNCTION()
-	void _Pause();
 
 	UUserWidget* CurrentWidget;
 		

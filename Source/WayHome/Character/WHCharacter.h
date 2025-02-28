@@ -17,6 +17,7 @@
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
 #include "InputMappingContext.h"
+#include "Blueprint/UserWidget.h"
 #include "WHCharacter.generated.h"
 
 UCLASS()
@@ -77,6 +78,8 @@ public:
 	UInputAction* CrouInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* InteInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* PausInputAction;
 
 private:
 	//Movements
@@ -90,6 +93,13 @@ private:
 	//New Input System
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+
+	//Pause
+	UPROPERTY()
+	TSubclassOf<UUserWidget> WBPauseClass;
+	UFUNCTION()
+	void _Pause();
+	UUserWidget* CurrentPauseWidget;
 
 	//Interaction
 	IInteractionInterface* Interface;
