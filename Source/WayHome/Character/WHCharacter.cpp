@@ -268,12 +268,6 @@ void AWHCharacter::Interact()
 {
 	if(InteractableActor)
 	{
-		UDialogueComponent* DialogueComponent = InteractableActor->FindComponentByClass<UDialogueComponent>();
-		if (DialogueComponent)
-		{
-			DialogueComponent->StartDialogue();
-			return;
-		}
 		if (InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 		{
 			IInteractionInterface::Execute_InteractWith(InteractableActor);
