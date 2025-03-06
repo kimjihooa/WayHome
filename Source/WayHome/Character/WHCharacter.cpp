@@ -164,10 +164,13 @@ void AWHCharacter::Tick(float DeltaTime)
 			IInteractionInterface::Execute_OutRange(InteractableActor);
 		}
 	}
-	InteractableActor = Closest;
-	if (InteractableActor && InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	if (InteractableActor != Closest)
 	{
-		IInteractionInterface::Execute_InRange(InteractableActor);
+		InteractableActor = Closest;
+		if (InteractableActor && InteractableActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		{
+			IInteractionInterface::Execute_InRange(InteractableActor);
+		}
 	}
 }
 
