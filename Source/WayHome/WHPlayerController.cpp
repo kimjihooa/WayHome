@@ -5,52 +5,31 @@
 
 AWHPlayerController::AWHPlayerController()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> GamePlayBP(TEXT("/Game/UI/GamePlay/WB_GamePlay.WB_GamePlay_C"));
-	if (GamePlayBP.Succeeded())
+	//Pause
+	static ConstructorHelpers::FClassFinder<UUserWidget> PauseBP(TEXT("/Game/UI/GamePlayPausepopup/WB_GamePlayPausePopUp.WB_GamePlayPausePopUp_C"));
+	if (PauseBP.Succeeded())
 	{
-		WBGamePlayClass = GamePlayBP.Class;
+		WBPauseClass = PauseBP.Class;
 	}
-
-	CurrentWidget = nullptr;
 }
 
 void AWHPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-
-	InputComponent->BindAction(TEXT("Tab"), EInputEvent::IE_Pressed, this, &AWHPlayerController::ShowGamePlayWidget);
-	InputComponent->BindAction(TEXT("Tab"), EInputEvent::IE_Released, this, &AWHPlayerController::RemoveGamePlayWidget);
 }
 
-void AWHPlayerController::ShowGamePlayWidget()
+
+void AWHPlayerController::BeginPlay()
 {
-	if (WBGamePlayClass)
+	Super::BeginPlay();
+
+	if (WBPauseClass)
 	{
-		CurrentWidget = CreateWidget<UUserWidget>(this, WBGamePlayClass);
-		if (CurrentWidget)
+		CurrentPauseWidget = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), WBPauseClass);
+		if (CurrentPauseWidget)
 		{
-			CurrentWidget->AddToViewport();
+			CurrentPauseWidget->AddToViewport();
+			CurrentPauseWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
-
-	//Input Mode to Game and UI
-	bShowMouseCursor = true;
-	FInputModeGameAndUI InputMode;
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputMode.SetHideCursorDuringCapture(false);
-	SetInputMode(InputMode);
-}
-
-void AWHPlayerController::RemoveGamePlayWidget()
-{
-	if (CurrentWidget && CurrentWidget->IsA(WBGamePlayClass))
-	{
-		CurrentWidget->RemoveFromParent();
-		CurrentWidget = nullptr;
-	}
-
-	//Input Mode to Game only
-	bShowMouseCursor = false;
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
 }
