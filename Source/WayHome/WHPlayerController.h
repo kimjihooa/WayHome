@@ -17,16 +17,19 @@ class WAYHOME_API AWHPlayerController : public APlayerController
 
 public:
 	AWHPlayerController();
+
 	virtual void SetupInputComponent() override;
 
-protected:
-	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> WBGamePlayClass;
+
 
 private:
-	//Pause
-	UPROPERTY()
-	TSubclassOf<UUserWidget> WBPauseClass;
-	UUserWidget* CurrentPauseWidget;
+	UFUNCTION()
+	void ShowGamePlayWidget();
+	UFUNCTION()
+	void RemoveGamePlayWidget();
 
+	UUserWidget* CurrentWidget;
 		
 };

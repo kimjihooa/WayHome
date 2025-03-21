@@ -10,17 +10,13 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "../InteractionInterface.h"
-#include "Blueprint/UserWidget.h"
-
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
 #include "InputMappingContext.h"
-
-#include "AbilitySystemInterface.h"
-#include "AbilitySystemComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "WHCharacter.generated.h"
 
 UCLASS()
@@ -81,6 +77,8 @@ public:
 	UInputAction* CrouInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* InteInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* PausInputAction;
 
 private:
 	//Movements
@@ -95,16 +93,15 @@ private:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
+	//Pause
+	UPROPERTY()
+	TSubclassOf<UUserWidget> WBPauseClass;
+	UFUNCTION()
+	void _Pause();
+	UUserWidget* CurrentPauseWidget;
+
 	//Interaction
 	IInteractionInterface* Interface;
 	void Interact();
 	AActor* InteractableActor;
-
-protected:
-	//Abiility System
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
-    UAbilitySystemComponent* AbilitySystemComponent;
-	UAbilitySystemComponent* GetAbilitySystemComponent() const;
-	//Dash
-	void Dash(const FInputActionInstance& Value);
 };
