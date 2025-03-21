@@ -96,8 +96,6 @@ private:
 	//Pause
 	UPROPERTY()
 	TSubclassOf<UUserWidget> WBPauseClass;
-	UFUNCTION()
-	void _Pause();
 	UUserWidget* CurrentPauseWidget;
 
 	//Interaction

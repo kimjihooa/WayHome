@@ -76,9 +76,6 @@ AWHCharacter::AWHCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_INTE(TEXT("/Game/Blueprints/Character/Input/IA_Interact.IA_Interact"));
 	if (IA_INTE.Succeeded())
 		InteInputAction = IA_INTE.Object;
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_PAUS(TEXT("/Game/Blueprints/Character/Input/IA_Pause.IA_Pause"));
-	if (IA_PAUS.Succeeded())
-		PausInputAction = IA_PAUS.Object;
 
 	//Pause
 	static ConstructorHelpers::FClassFinder<UUserWidget> PauseBP(TEXT("/Game/UI/GamePlayPausepopup/WB_GamePlayPausePopUp.WB_GamePlayPausePopUp_C"));
@@ -189,7 +186,6 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Crouch_);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
 		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Interact);
-		EnhancedInputComponent->BindAction(PausInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::_Pause);
 	}
 
 	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
@@ -259,11 +255,6 @@ void AWHCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(AxisValue.X);
 		AddControllerPitchInput(AxisValue.Y * -1.0f);
 	}
-}
-
-void AWHCharacter::_Pause()
-{
-
 }
 
 //Interaction

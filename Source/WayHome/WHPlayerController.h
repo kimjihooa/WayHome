@@ -19,17 +19,5 @@ public:
 	AWHPlayerController();
 
 	virtual void SetupInputComponent() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> WBGamePlayClass;
-
-
 private:
-	UFUNCTION()
-	void ShowGamePlayWidget();
-	UFUNCTION()
-	void RemoveGamePlayWidget();
-
-	UUserWidget* CurrentWidget;
-		
 };
