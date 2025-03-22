@@ -17,6 +17,9 @@
 #include "Components/InputComponent.h"
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "WHCharacter.generated.h"
 
 UCLASS()
@@ -79,6 +82,8 @@ public:
 	UInputAction* InteInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* PausInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* DashInputAction;
 
 private:
 	//Movements
@@ -102,4 +107,12 @@ private:
 	IInteractionInterface* Interface;
 	void Interact();
 	AActor* InteractableActor;
+
+protected:
+	//Abilities
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities")
+	UAbilitySystemComponent* AbilitySystemComponent;
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	UAbilitySystemComponent* GetAbilityComponent();
+	void Dash(const FInputActionInstance& Value);
 };

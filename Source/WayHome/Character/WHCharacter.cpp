@@ -76,6 +76,9 @@ AWHCharacter::AWHCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_INTE(TEXT("/Game/Blueprints/Character/Input/IA_Interact.IA_Interact"));
 	if (IA_INTE.Succeeded())
 		InteInputAction = IA_INTE.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_DASH(TEXT("/Game/Blueprints/Character/Input/IA_Dash.IA_Dash"));
+	if (IA_DASH.Succeeded())
+		DashInputAction = IA_DASH.Object;
 
 	//Pause
 	static ConstructorHelpers::FClassFinder<UUserWidget> PauseBP(TEXT("/Game/UI/GamePlayPausepopup/WB_GamePlayPausePopUp.WB_GamePlayPausePopUp_C"));
@@ -83,6 +86,8 @@ AWHCharacter::AWHCharacter()
 	{
 		WBPauseClass = PauseBP.Class;
 	}
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Abilities"));
 }
 
 // Called when the game starts or when spawned
@@ -186,6 +191,7 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Crouch_);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
 		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Interact);
+		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Dash);
 	}
 
 	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
@@ -267,4 +273,17 @@ void AWHCharacter::Interact()
 			IInteractionInterface::Execute_InteractWith(InteractableActor);
 		}
 	}
+}
+
+UAbilitySystemComponent* AWHCharacter::GetAbilityComponent()
+{
+	return AbilitySystemComponent;
+}
+
+void AWHCharacter::Dash(const FInputActionInstance& Value)
+{
+	FGameplayEventData EventData;
+	EventData.EventMagnitude = Value.GetElapsedTime();
+
+	UE_LOG(LogTemp, Warning, TEXT("Dash"));
 }
