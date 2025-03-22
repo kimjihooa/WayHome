@@ -190,8 +190,8 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Crouch_);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
-		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Interact);
-		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Dash);
+		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Started, this, &AWHCharacter::Interact);
+		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Dash);
 	}
 
 	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
@@ -284,6 +284,5 @@ void AWHCharacter::Dash(const FInputActionInstance& Value)
 {
 	FGameplayEventData EventData;
 	EventData.EventMagnitude = Value.GetElapsedTime();
-
-	UE_LOG(LogTemp, Warning, TEXT("Dash"));
+	AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag(FName("Ability.Dash"))));
 }
