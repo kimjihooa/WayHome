@@ -114,5 +114,6 @@ protected:
 	UAbilitySystemComponent* AbilitySystemComponent;
 	UFUNCTION(BlueprintCallable, Category = "Abilities")
 	UAbilitySystemComponent* GetAbilityComponent();
-	void Dash(const FInputActionInstance& Value);
+	void DashCharge();
+	void Dash();
 };
