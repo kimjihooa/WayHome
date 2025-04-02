@@ -193,6 +193,7 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Started, this, &AWHCharacter::Interact);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Started, this, &AWHCharacter::DashCharge);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Dash);
+		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Started, this, &AWHCharacter::DoubleJump);
 	}
 
 	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
@@ -276,11 +277,13 @@ void AWHCharacter::Interact()
 	}
 }
 
+//Abilities
 UAbilitySystemComponent* AWHCharacter::GetAbilityComponent()
 {
 	return AbilitySystemComponent;
 }
 
+//Dash
 void AWHCharacter::DashCharge()
 {
 	//AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag(FName("Ability.Dash"))));
@@ -289,4 +292,18 @@ void AWHCharacter::DashCharge()
 void AWHCharacter::Dash()
 {
 	AbilitySystemComponent->ReleaseInputID(0);
+}
+
+//DoubleJump
+void AWHCharacter::DoubleJump()
+{
+	if(GetCharacterMovement()->IsFalling())
+	{
+		AbilitySystemComponent->PressInputID(1);
+	}
+}
+void AWHCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	AbilitySystemComponent->ReleaseInputID(1);
 }
