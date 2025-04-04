@@ -194,6 +194,8 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Started, this, &AWHCharacter::DashCharge);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Dash);
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Started, this, &AWHCharacter::DoubleJump);
+		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Started, this, &AWHCharacter::Glide);
+		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Completed, this, &AWHCharacter::EndGlide);
 	}
 
 	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
@@ -297,7 +299,7 @@ void AWHCharacter::Dash()
 //DoubleJump
 void AWHCharacter::DoubleJump()
 {
-	if(GetCharacterMovement()->IsFalling())
+	if (GetCharacterMovement()->IsFalling())
 	{
 		AbilitySystemComponent->PressInputID(1);
 	}
@@ -305,5 +307,19 @@ void AWHCharacter::DoubleJump()
 void AWHCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-	AbilitySystemComponent->ReleaseInputID(1);
+	AbilitySystemComponent->ReleaseInputID(1); //For DoubleJump
+	AbilitySystemComponent->ReleaseInputID(2); //For Gliding
+}
+
+//Glide
+void AWHCharacter::Glide()
+{
+	if (GetCharacterMovement()->IsFalling())
+	{
+		AbilitySystemComponent->PressInputID(2);
+	}
+}
+void AWHCharacter::EndGlide()
+{
+	AbilitySystemComponent->ReleaseInputID(2);
 }

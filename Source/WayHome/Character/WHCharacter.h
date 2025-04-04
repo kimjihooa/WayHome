@@ -118,4 +118,6 @@ protected:
 	void Dash();
 	void DoubleJump();
 	virtual void Landed(const FHitResult& Hit) override;
+	void Glide();
+	void EndGlide();
 };
