@@ -47,17 +47,19 @@ AWHBear::AWHBear()
 	Attach = CreateDefaultSubobject<USceneComponent>(TEXT("Ride"));
 	Attach->SetupAttachment(GetCapsuleComponent());
 	Attach->SetRelativeLocation(FVector(0.0f, -40.0f, 70.0f));
-	Detach = CreateDefaultSubobject<USceneComponent>(TEXT("GetOff"));
-	Detach->SetupAttachment(GetCapsuleComponent());
-	Detach->SetRelativeLocation(FVector(0.0f, -160.0f, -70.0f));
+	DetachL = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GetOffL"));
+	DetachL->SetupAttachment(GetCapsuleComponent());
+	DetachL->SetRelativeLocation(FVector(0.0f, -120.0f, 0.0f));
+	DetachL->SetCapsuleHalfHeight(88.0f);
+	DetachL->SetCapsuleRadius(34.0f);
+	DetachL->SetCollisionProfileName(FName("OverlapAll"));
+	DetachR = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GetOffR"));
+	DetachR->SetupAttachment(GetCapsuleComponent());
+	DetachR->SetRelativeLocation(FVector(0.0f, 120.0f, 0.0f));
+	DetachR->SetCapsuleHalfHeight(88.0f);
+	DetachR->SetCapsuleRadius(34.0f);
+	DetachR->SetCollisionProfileName(FName("OverlapAll"));
 	
-	//Dash
-	//DashChargeStartTime = 0.0f;
-	DashPower = 3000.0f;
-	MaxDashChargeTime = 3.0f;
-	bCanDash = true;
-	DashCooltime = 0.2;
-
 	//Input
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext>CONTEXT(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IMC_Bear.IMC_Bear"));
 	if (CONTEXT.Succeeded())
@@ -77,13 +79,15 @@ AWHBear::AWHBear()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_DASH(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IA_BearDash.IA_BearDash"));
 	if (IA_DASH.Succeeded())
 		DashInputAction = IA_DASH.Object;
+
+	//Dash Ability
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Ability"));
 }
 
 // Called when the game starts or when spawned
 void AWHBear::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 void AWHBear::PossessedBy(AController* NewController)
 {
@@ -117,6 +121,7 @@ void AWHBear::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AWHBear::Look);
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &AWHBear::Jump);
 		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Triggered, this, &AWHBear::GetOff);
+		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Started, this, &AWHBear::DashCharge);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHBear::Dash);
 	}
 
@@ -166,53 +171,26 @@ void AWHBear::Look(const FInputActionValue& Value)
 	}
 }
 
+UAbilitySystemComponent* AWHBear::GetAbilityComponent()
+{
+	return AbilitySystemComponent;
+}
+
 //Dash
-void AWHBear::Dash(const FInputActionInstance& Value)
+void AWHBear::DashCharge()
 {
-	if (!bCanDash)
-		return;
-
-	float ChargeTime = Value.GetElapsedTime();
-	ChargeTime = ChargeTime < MaxDashChargeTime ? ChargeTime : MaxDashChargeTime;
-	UE_LOG(LogTemp, Warning, TEXT("%f"), ChargeTime);
-	bCanDash = false;
-	ChargeTime = log2(ChargeTime + 1);
-	FVector DashDiraction;
-
-	if (GetCharacterMovement())
+	if (AbilitySystemComponent)
 	{
-		if (GetCharacterMovement()->CurrentFloor.IsWalkableFloor())
-		{
-			FVector FloorNormal = GetCharacterMovement()->CurrentFloor.HitResult.ImpactNormal;
-			DashDiraction = FVector::CrossProduct(GetActorRightVector(), FloorNormal);
-		}
-		else
-		{
-			DashDiraction = GetActorForwardVector();
-		}
+		AbilitySystemComponent->PressInputID(0);
 	}
-
-	FVector DashVector = DashDiraction * ChargeTime * DashPower;
-	//DashVector.Normalize();
-	LaunchCharacter(DashVector, false, false);
-
-	//Cooltime
-	GetWorld()->GetTimerManager().SetTimer(DashCooltimer, this, &AWHBear::ResetDashTimer, DashCooltime, false);
 }
-void AWHBear::ResetDashTimer()
+void AWHBear::Dash()
 {
-	bCanDash = true;
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->ReleaseInputID(0);
+	}
 }
-//void AWHBear::StartDashCharge()
-//{
-//	DashChargeStartTime = GetWorld()->GetTimeSeconds();
-//}
-//void AWHBear::EndDashCharge()
-//{
-//	float ChargeAmount = fmin(float(GetWorld()->GetTimeSeconds() - DashChargeStartTime), MaxDashChargeTime);
-//	UE_LOG(LogTemp, Warning, TEXT("Dash Charge Amount: %f"), ChargeAmount);
-//	Dash(ChargeAmount);
-//}
 
 //Ride
 void AWHBear::InteractWith_Implementation()
@@ -238,14 +216,41 @@ void AWHBear::OutRange_Implementation()
 }
 void AWHBear::GetOff()
 {
-	if(OriginalPawn->IsValidLowLevel() && GetCharacterMovement()->IsMovingOnGround())
+	TArray<AActor*> LActorList;
+	DetachL->GetOverlappingActors(LActorList);
+	int OverlapL = LActorList.Num();
+	TArray<AActor*> RActorList;
+	DetachR->GetOverlappingActors(RActorList);
+	int OverlapR = RActorList.Num();
+
+	if (OriginalPawn->IsValidLowLevel() && GetCharacterMovement()->IsMovingOnGround())
 	{
-		OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
-		GetCharacterMovement()->StopMovementImmediately();
-		OriginalPawn->SetActorTransform(Detach->GetComponentTransform());
-		OriginalPawn->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
+		if (OverlapL == 0)
+		{
+			OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
+			GetCharacterMovement()->StopMovementImmediately();
+			OriginalPawn->SetActorTransform(DetachL->GetComponentTransform());
+			OriginalPawn->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
+		}
+		else
+		{
+			if (OverlapR == 0)
+			{
+				OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
+				GetCharacterMovement()->StopMovementImmediately();
+				OriginalPawn->SetActorTransform(DetachR->GetComponentTransform());
+				OriginalPawn->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+				GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No where to get off!!"));
+			}
+		}
 	}
 }

@@ -15,6 +15,7 @@
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
 #include "InputMappingContext.h"
+#include "AbilitySystemComponent.h"
 #include "WHBear.generated.h"
 
 UCLASS()
@@ -49,20 +50,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneComponent* Attach;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USceneComponent* Detach;
+	UCapsuleComponent* DetachL;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCapsuleComponent* DetachR;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* CharacterMesh;
-
-	UPROPERTY(BlueprintReadWrite)
-	float DashPower;
-	UPROPERTY(BlueprintReadWrite)
-	float MaxDashChargeTime;
-	UPROPERTY(BlueprintReadWrite)
-	float DashCooltime;
-	FTimerHandle DashCooltimer;
-	bool bCanDash;
-	UFUNCTION(BlueprintCallable)
-	void ResetDashTimer();
 
 	//Input
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
@@ -78,6 +70,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* DashInputAction;
 
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	UAbilitySystemComponent* GetAbilityComponent();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities")
+	UAbilitySystemComponent* AbilitySystemComponent;
+
 private:
 	//void MoveForward(float NewAxisValue);
 	//void MoveRight(float NewAxisValue);
@@ -90,7 +87,8 @@ private:
 	ACharacter* OriginalPawn;
 	void GetOff();
 
-	void Dash(const FInputActionInstance& Value);
+	void DashCharge();
+	void Dash();
 	//void StartDashCharge();
 	//void EndDashCharge();
 	//float DashChargeStartTime;
