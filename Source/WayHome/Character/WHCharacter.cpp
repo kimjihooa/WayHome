@@ -80,13 +80,6 @@ AWHCharacter::AWHCharacter()
 	if (IA_DASH.Succeeded())
 		DashInputAction = IA_DASH.Object;
 
-	//Pause
-	static ConstructorHelpers::FClassFinder<UUserWidget> PauseBP(TEXT("/Game/UI/GamePlayPausepopup/WB_GamePlayPausePopUp.WB_GamePlayPausePopUp_C"));
-	if (PauseBP.Succeeded())
-	{
-		WBPauseClass = PauseBP.Class;
-	}
-
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Abilities"));
 }
 
@@ -100,15 +93,6 @@ void AWHCharacter::BeginPlay()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(CharacterMappingContext, 0);
-		}
-	}
-	if (WBPauseClass)
-	{
-		CurrentPauseWidget = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), WBPauseClass);
-		if (CurrentPauseWidget)
-		{
-			CurrentPauseWidget->AddToViewport();
-			CurrentPauseWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }

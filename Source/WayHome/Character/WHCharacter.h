@@ -98,11 +98,6 @@ private:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
-	//Pause
-	UPROPERTY()
-	TSubclassOf<UUserWidget> WBPauseClass;
-	UUserWidget* CurrentPauseWidget;
-
 	//Interaction
 	IInteractionInterface* Interface;
 	void Interact();
