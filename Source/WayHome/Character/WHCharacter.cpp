@@ -11,9 +11,9 @@ AWHCharacter::AWHCharacter()
 
 	bIsSprinting = false;
 	bIsCrouching = false;
-	WalkSpeed = 0.0f;
-	SprintSpeed = 10.0f;
-	CrouchSpeed = 1.0f;
+	WalkSpeed = 500.0f;
+	SprintSpeed = 700.0f;
+	CrouchSpeed = 300.0f;
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
