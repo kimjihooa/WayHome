@@ -50,9 +50,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneComponent* Attach;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UCapsuleComponent* DetachL;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UCapsuleComponent* DetachR;
+	USceneComponent* Detach;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* CharacterMesh;
 

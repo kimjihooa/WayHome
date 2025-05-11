@@ -47,18 +47,9 @@ AWHBear::AWHBear()
 	Attach = CreateDefaultSubobject<USceneComponent>(TEXT("Ride"));
 	Attach->SetupAttachment(GetCapsuleComponent());
 	Attach->SetRelativeLocation(FVector(0.0f, -40.0f, 70.0f));
-	DetachL = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GetOffL"));
-	DetachL->SetupAttachment(GetCapsuleComponent());
-	DetachL->SetRelativeLocation(FVector(0.0f, -120.0f, 0.0f));
-	DetachL->SetCapsuleHalfHeight(88.0f);
-	DetachL->SetCapsuleRadius(34.0f);
-	DetachL->SetCollisionProfileName(FName("OverlapAll"));
-	DetachR = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GetOffR"));
-	DetachR->SetupAttachment(GetCapsuleComponent());
-	DetachR->SetRelativeLocation(FVector(0.0f, 120.0f, 0.0f));
-	DetachR->SetCapsuleHalfHeight(88.0f);
-	DetachR->SetCapsuleRadius(34.0f);
-	DetachR->SetCollisionProfileName(FName("OverlapAll"));
+	Detach = CreateDefaultSubobject<USceneComponent>(TEXT("GetOff"));
+	Detach->SetupAttachment(GetCapsuleComponent());
+	Detach->SetRelativeLocation(FVector(-70.0f, -70.0f, 5.0f));
 	
 	//Input
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext>CONTEXT(TEXT("/Game/Blueprints/2_Yellow/Bear/Input/IMC_Bear.IMC_Bear"));
@@ -120,7 +111,7 @@ void AWHBear::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AWHBear::Move);
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AWHBear::Look);
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &AWHBear::Jump);
-		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Triggered, this, &AWHBear::GetOff);
+		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Started, this, &AWHBear::GetOff);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Started, this, &AWHBear::DashCharge);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHBear::Dash);
 	}
@@ -216,41 +207,56 @@ void AWHBear::OutRange_Implementation()
 }
 void AWHBear::GetOff()
 {
-	TArray<AActor*> LActorList;
-	DetachL->GetOverlappingActors(LActorList);
-	int OverlapL = LActorList.Num();
-	TArray<AActor*> RActorList;
-	DetachR->GetOverlappingActors(RActorList);
-	int OverlapR = RActorList.Num();
+	float CapsuleRadius = GetWorld()->GetFirstPlayerController()->GetCharacter()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	float CapsuleHalfHeight = GetWorld()->GetFirstPlayerController()->GetCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight);
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActor(OriginalPawn);
+	TArray<FHitResult> HitResults;
+
+	FVector DetachPos = Detach->GetComponentLocation();
+	FVector Start = DetachPos;
+	FVector End = DetachPos;
+
+	bool bHit = GetWorld()->SweepMultiByObjectType(
+		HitResults,
+		Start,
+		End,
+		FQuat::Identity,
+		ObjectQueryParams,
+		CapsuleShape,
+		QueryParams
+	);
+
+	for (const FHitResult& Hit : HitResults)
+	{
+		if (AActor* HitActor = Hit.GetActor())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitActor->GetName());
+		}
+	}
+	DrawDebugCapsule(GetWorld(), DetachPos, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity,
+		bHit ? FColor::Red : FColor::Green, false, 2.0f);
 
 	if (OriginalPawn->IsValidLowLevel() && GetCharacterMovement()->IsMovingOnGround())
 	{
-		if (OverlapL == 0)
+		if (!bHit)
 		{
 			OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
 			GetCharacterMovement()->StopMovementImmediately();
-			OriginalPawn->SetActorTransform(DetachL->GetComponentTransform());
+			OriginalPawn->SetActorLocation(DetachPos);
 			OriginalPawn->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
 		}
 		else
 		{
-			if (OverlapR == 0)
-			{
-				OriginalPawn->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				OriginalPawn->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				OriginalPawn->GetCharacterMovement()->StopMovementImmediately();
-				GetCharacterMovement()->StopMovementImmediately();
-				OriginalPawn->SetActorTransform(DetachR->GetComponentTransform());
-				OriginalPawn->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-				GetWorld()->GetFirstPlayerController()->Possess(OriginalPawn);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("No where to get off!!"));
-			}
+			UE_LOG(LogTemp, Warning, TEXT("No where to get off!!"));
 		}
 	}
 }
