@@ -79,6 +79,9 @@ AWHCharacter::AWHCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_DASH(TEXT("/Game/Blueprints/Character/Input/IA_Dash.IA_Dash"));
 	if (IA_DASH.Succeeded())
 		DashInputAction = IA_DASH.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_UITO(TEXT("/Game/Blueprints/Character/Input/IA_UIToggle.IA_UIToggle"));
+	if (IA_UITO.Succeeded())
+		UIToInputAction = IA_UITO.Object;
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Abilities"));
 }

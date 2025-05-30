@@ -84,6 +84,8 @@ public:
 	UInputAction* PausInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* DashInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* UIToInputAction;
 
 private:
 	//Movements
