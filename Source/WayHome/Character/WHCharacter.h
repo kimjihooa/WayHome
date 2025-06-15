@@ -60,6 +60,10 @@ public:
 	float SprintSpeed;
 	UPROPERTY(BlueprintReadWrite)
 	float CrouchSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanSprint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanCrouch;
 
 	//Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

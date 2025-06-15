@@ -82,6 +82,8 @@ AWHCharacter::AWHCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_UITO(TEXT("/Game/Blueprints/Character/Input/IA_UIToggle.IA_UIToggle"));
 	if (IA_UITO.Succeeded())
 		UIToInputAction = IA_UITO.Object;
+	bCanSprint = true;
+	bCanCrouch = true;
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Abilities"));
 }
@@ -216,19 +218,25 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 //}
 void AWHCharacter::Walk()
 {
-	bIsSprinting = false;
-	bIsCrouching = false;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	UnCrouch();
+	if(bCanSprint && bCanCrouch)
+	{
+		bIsSprinting = false;
+		bIsCrouching = false;
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		UnCrouch();
+	}
 }
 void AWHCharacter::Sprint()
 {
-	bIsSprinting = true;
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	if(bCanSprint)
+	{
+		bIsSprinting = true;
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
 }
 void AWHCharacter::Crouch_()
 {
-	if(GetCharacterMovement()->IsMovingOnGround())
+	if(bCanCrouch && GetCharacterMovement()->IsMovingOnGround())
 	{
 		bIsCrouching = true;
 		Crouch();
