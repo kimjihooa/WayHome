@@ -64,6 +64,8 @@ public:
 	bool bCanSprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanCrouch;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanJump;
 
 	//Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -100,6 +102,7 @@ private:
 	void Walk();
 	void Sprint();
 	void Crouch_();
+	void Jump_();
 	//New Input System
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

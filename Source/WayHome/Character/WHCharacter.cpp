@@ -84,6 +84,7 @@ AWHCharacter::AWHCharacter()
 		UIToInputAction = IA_UITO.Object;
 	bCanSprint = true;
 	bCanCrouch = true;
+	bCanJump = true;
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Abilities"));
 }
@@ -174,7 +175,7 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	{
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Move);
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Look);
-		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Jump_);
 		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Sprint);
 		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Crouch_);
@@ -240,6 +241,14 @@ void AWHCharacter::Crouch_()
 	{
 		bIsCrouching = true;
 		Crouch();
+	}
+}
+
+void AWHCharacter::Jump_()
+{
+	if (bCanJump)
+	{
+		Jump();
 	}
 }
 
