@@ -82,9 +82,18 @@ AWHCharacter::AWHCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_UITO(TEXT("/Game/Blueprints/Character/Input/IA_UIToggle.IA_UIToggle"));
 	if (IA_UITO.Succeeded())
 		UIToInputAction = IA_UITO.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Asce(TEXT("/Game/Blueprints/Character/Input/IA_Ascend.IA_Ascend"));
+	if (IA_Asce.Succeeded())
+		AsceInputAction = IA_Asce.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_DESC(TEXT("/Game/Blueprints/Character/Input/IA_Descend.IA_Descend"));
+	if (IA_DESC.Succeeded())
+		DescInputAction = IA_DESC.Object;
+
 	bCanSprint = true;
 	bCanCrouch = true;
 	bCanJump = true;
+	bCanAscend = false;
+	bCanDescend = false;
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Abilities"));
 }
@@ -180,6 +189,8 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Crouch_);
 		EnhancedInputComponent->BindAction(CrouInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Walk);
+		EnhancedInputComponent->BindAction(AsceInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Ascend);
+		EnhancedInputComponent->BindAction(DescInputAction, ETriggerEvent::Triggered, this, &AWHCharacter::Descend);
 		EnhancedInputComponent->BindAction(InteInputAction, ETriggerEvent::Started, this, &AWHCharacter::Interact);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Started, this, &AWHCharacter::DashCharge);
 		EnhancedInputComponent->BindAction(DashInputAction, ETriggerEvent::Completed, this, &AWHCharacter::Dash);
@@ -257,8 +268,11 @@ void AWHCharacter::Move(const FInputActionValue& Value)
 	FVector2D AxisValue = Value.Get<FVector2D>();
 	if(GetController())
 	{
-		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), AxisValue.Y);
-		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), AxisValue.X);
+		FRotator ControlRot = GetControlRotation();
+		ControlRot.Pitch = 0.0f;
+		ControlRot.Roll = 0.0f;
+		AddMovementInput(FRotationMatrix(ControlRot).GetUnitAxis(EAxis::X), AxisValue.Y);
+		AddMovementInput(FRotationMatrix(ControlRot).GetUnitAxis(EAxis::Y), AxisValue.X);
 	}
 }
 void AWHCharacter::Look(const FInputActionValue& Value)
@@ -268,6 +282,23 @@ void AWHCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(AxisValue.X);
 		AddControllerPitchInput(AxisValue.Y * -1.0f);
+	}
+}
+
+void AWHCharacter::Ascend(const FInputActionValue& Value)
+{
+	float AxisValue = Value.Get<float>();
+	if (bCanAscend)
+	{
+		AddMovementInput(FVector(0.0f, 0.0f, 1.0f), AxisValue);
+	}
+}
+void AWHCharacter::Descend(const FInputActionValue& Value)
+{
+	float AxisValue = Value.Get<float>();
+	if (bCanDescend)
+	{
+		AddMovementInput(FVector(0.0f, 0.0f, -1.0f), AxisValue);
 	}
 }
 

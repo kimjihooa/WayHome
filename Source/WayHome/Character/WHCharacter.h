@@ -66,6 +66,10 @@ public:
 	bool bCanCrouch;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanJump;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanAscend;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanDescend;
 
 	//Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -92,6 +96,10 @@ public:
 	UInputAction* DashInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* UIToInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* AsceInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* DescInputAction;
 
 private:
 	//Movements
@@ -106,6 +114,8 @@ private:
 	//New Input System
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Ascend(const FInputActionValue& Value);
+	void Descend(const FInputActionValue& Value);
 
 	//Interaction
 	IInteractionInterface* Interface;
