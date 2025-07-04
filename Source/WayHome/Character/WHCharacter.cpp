@@ -88,6 +88,9 @@ AWHCharacter::AWHCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_DESC(TEXT("/Game/Blueprints/Character/Input/IA_Descend.IA_Descend"));
 	if (IA_DESC.Succeeded())
 		DescInputAction = IA_DESC.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_GIMM(TEXT("/Game/Blueprints/Character/Input/IA_Gimmick.IA_Gimmick"));
+	if (IA_GIMM.Succeeded())
+		GimmInputAction = IA_GIMM.Object;
 
 	bCanSprint = true;
 	bCanCrouch = true;
@@ -197,6 +200,7 @@ void AWHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Started, this, &AWHCharacter::DoubleJump);
 		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Started, this, &AWHCharacter::Glide);
 		EnhancedInputComponent->BindAction(SpriInputAction, ETriggerEvent::Completed, this, &AWHCharacter::EndGlide);
+		EnhancedInputComponent->BindAction(GimmInputAction, ETriggerEvent::Started, this, &AWHCharacter::Gimmik);
 	}
 
 	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AWHCharacter::MoveForward);
@@ -312,6 +316,10 @@ void AWHCharacter::Interact()
 			IInteractionInterface::Execute_InteractWith(InteractableActor);
 		}
 	}
+}
+void AWHCharacter::Gimmik()
+{
+	OnGimmikInteract.Broadcast();
 }
 
 //Abilities

@@ -22,6 +22,8 @@
 #include "GameplayTagContainer.h"
 #include "WHCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGimmikInteract);
+
 UCLASS()
 class WAYHOME_API AWHCharacter : public ACharacter
 {
@@ -74,6 +76,10 @@ public:
 	//Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USphereComponent* Interaction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	AActor* InteractableActor;
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnGimmikInteract OnGimmikInteract;
 
 	//Input System
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
@@ -100,6 +106,8 @@ public:
 	UInputAction* AsceInputAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* DescInputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* GimmInputAction;
 
 private:
 	//Movements
@@ -120,7 +128,7 @@ private:
 	//Interaction
 	IInteractionInterface* Interface;
 	void Interact();
-	AActor* InteractableActor;
+	void Gimmik();
 
 protected:
 	//Abilities
