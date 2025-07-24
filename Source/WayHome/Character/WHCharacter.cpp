@@ -291,18 +291,22 @@ void AWHCharacter::Look(const FInputActionValue& Value)
 
 void AWHCharacter::Ascend(const FInputActionValue& Value)
 {
-	float AxisValue = Value.Get<float>();
 	if (bCanAscend)
 	{
-		AddMovementInput(FVector(0.0f, 0.0f, 1.0f), AxisValue);
+		float AxisValue = Value.Get<float>();
+		FVector ForwardVector = GetActorForwardVector();
+		ForwardVector = ForwardVector * 0.00001f;
+		AddMovementInput(FVector(0.0f, 0.0f, 1.0f) + ForwardVector, AxisValue);
 	}
 }
 void AWHCharacter::Descend(const FInputActionValue& Value)
 {
-	float AxisValue = Value.Get<float>();
 	if (bCanDescend)
 	{
-		AddMovementInput(FVector(0.0f, 0.0f, -1.0f), AxisValue);
+		float AxisValue = Value.Get<float>();
+		FVector ForwardVector = GetActorForwardVector();
+		ForwardVector = ForwardVector * 0.00001f;
+		AddMovementInput(FVector(0.0f, 0.0f, -1.0f) + ForwardVector, AxisValue);
 	}
 }
 
