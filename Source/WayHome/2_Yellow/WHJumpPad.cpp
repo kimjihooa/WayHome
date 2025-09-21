@@ -40,11 +40,14 @@ void AWHJumpPad::Tick(float DeltaTime)
 void AWHJumpPad::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacter* OtherCharacter = Cast<ACharacter>(OtherActor);
-	FVector Incoming = OtherCharacter->GetVelocity();
-	FVector Normal = Direction->GetForwardVector();
-	FVector Reflected = Incoming - 2 * FVector::DotProduct(Incoming, Normal) * Normal;
+	if(OtherCharacter->IsValidLowLevelFast())
+	{
+		FVector Incoming = OtherCharacter->GetVelocity();
+		FVector Normal = Direction->GetForwardVector();
+		FVector Reflected = Incoming - 2 * FVector::DotProduct(Incoming, Normal) * Normal;
 
-	OtherCharacter->LaunchCharacter(Reflected * LunchFactor, true, true);
+		OtherCharacter->LaunchCharacter(Reflected * LunchFactor, true, true);
+	}
 }
 
 
