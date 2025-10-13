@@ -113,6 +113,7 @@ void AWHCharacter::BeginPlay()
 			Subsystem->AddMappingContext(CharacterMappingContext, 0);
 		}
 	}
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 void AWHCharacter::PossessedBy(AController* NewController)
 {

@@ -56,9 +56,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool bIsCrouching;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float WalkSpeed;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed;
 	UPROPERTY(BlueprintReadWrite)
 	float CrouchSpeed;
